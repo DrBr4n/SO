@@ -13,9 +13,9 @@ int main (int argc, char * argv[]) {
     
 
 
-    if (fork() == 0)
+    if (fork() == 0)    
     {
-        //fechar no descritor de escrita
+        //fechar o descritor de escrita
         close(pipe_fd[1]);
 
         //stdin -> pipe_fd[0]
