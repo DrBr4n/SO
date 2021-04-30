@@ -10,8 +10,6 @@ int main (int argc, char * argv[]) {
 
     int errorFd = open("erros.txt", O_RDONLY | O_TRUNC | O_CREAT, 0644);
 
-
-
     dup2(inputFd, 0);
     close(inputFd);
 
@@ -22,7 +20,6 @@ int main (int argc, char * argv[]) {
     close(errorFd);
 
     sleep(60);
-
 
     return 0;
 }

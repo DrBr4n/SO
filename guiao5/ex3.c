@@ -12,9 +12,7 @@ int main (int argc, char * argv[]) {
     }
     
 
-
-    if (fork() == 0)    
-    {
+    if (fork() == 0) {
         //fechar o descritor de escrita
         close(pipe_fd[1]);
 
@@ -24,24 +22,33 @@ int main (int argc, char * argv[]) {
         //fechar pipe_fd[0]
         close(pipe_fd[0]);
 
+        //stdin(0) -> leitura pipe
+        //stdout(1) -> ecra
+        sleep(2);
         execlp("wc", "wc", NULL);
 
         _exit(1);
     }
     
-    wait(NULL);
     printf("parent pid: %d\n", getpid());
+    char * s = "ola";
+    write(pipe_fd[1], s, 3);
 
     //fecha descritor de leitura
     close(pipe_fd[0]);
-
-    char buf[10];
-    int bytes;
-    while ((bytes = read(0, buf, bytes)) > 0)
-    {
-        write(pipe_fd[1], buf, bytes);        
-    }
     
+    //char buf[10];
+    //int bytes;
+    //while ((bytes = read(0, buf, bytes)) > 0)
+    //{
+    //    write(pipe_fd[1], buf, bytes);        
+    //}
+    //for (int i = 0; i < 5; i++) {
+    //    printf("s");
+    //    bytes = read(0, buf, bytes);
+    //    write(pipe_fd[1], buf, bytes);
+    //}
 
+    wait(NULL);
     return 0;
 }

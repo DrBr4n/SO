@@ -5,7 +5,7 @@
 
 int main (int argc, char * argv[]) {
 
-    int inputFd = open("intput.txt", O_RDONLY);
+    int inputFd = open("input.txt", O_RDONLY);
 
     int outputFd = open("saida.txt", O_CREAT | O_TRUNC | O_RDONLY, 0644);
 
@@ -27,14 +27,16 @@ int main (int argc, char * argv[]) {
         write(2, &c, 1);
     }
 
+    char * s = "atao";
+    write(outputFd, &s, 4);
+
     //if (fork() == 0) {
-    //    sleep(30);
-    //    //execl("~/Documents/SO/guiao1/readln", "rdln", argv, NULL);
+    //    //sleep(30);
+    //    execl("~/Documents/SO/guiao1/readln", "rdln", 0, NULL);
     //
     //    printf("fs");
     //    _exit(0);
     //}
-
     //wait(NULL); 
 
     //sleep(60);
