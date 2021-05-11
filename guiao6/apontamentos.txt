@@ -1,0 +1,13 @@
+mkfifo(..)
+
+open(..)
+
+
+reads..
+
+writes..
+
+
+close(..)
+
+unlink(..)
