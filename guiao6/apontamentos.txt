@@ -11,3 +11,19 @@ writes..
 close(..)
 
 unlink(..)
+
+---
+
+no ex2 para fazer o servidor responder a cada client tem de se abrir um named pipe (em que o nome é o pid
+do cliente) para cada ligação servidor-cliente
+A mensagem seria composta por "pid" + "mensagem" e o servidor para responder ao client certo so tem de ler
+o pid e usar o pipe correspondente
+
+tamanho max do pipe esta predefinido num header
+
+escrever sempre num só write(operação atómica) para nao haver mistura de mensagem
+garantir que a escrita acontece de uma só vez
+
+buffer de 512
+msg de 1024
+write(msg), vai escrever 512 de cada vez, mas não mistura(acho)

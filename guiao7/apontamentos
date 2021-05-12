@@ -1,0 +1,5 @@
+associar handlers a sinais
+
+ter logica em cada um dos handlers
+
+garantir que o alarm não leva reset
