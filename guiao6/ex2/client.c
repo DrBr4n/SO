@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <string.h>
 
 
 int main(int argc, char * argv[]) {
@@ -19,6 +20,10 @@ int main(int argc, char * argv[]) {
     for (int i = 0; argv[1][i] != 0; i++) {
         c++;
     }
+
+    //dar new line ao fim de cada mensagem
+    strcat(argv[1], "\n");
+    c += 2;
 
     write(fifo_fd, argv[1], c);
     

@@ -22,10 +22,10 @@ int main() {
         return 1;
     }
 
-    //abrir o pipe fifo para escrita, so para nao fechar o server
-    int fifo_fd_write = open("fifo", O_WRONLY);
     //abrir o pipe fifo para ler
     int fifo_fd = open("fifo", O_RDONLY);
+    //abrir o pipe fifo para escrita, so para nao fechar o server
+    int fifo_fd_write = open("fifo", O_WRONLY);
     
     if (fifo_fd < 0) 
         perror("open fifo");
