@@ -13,6 +13,11 @@ int main(int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         if(fork() == 0){
             pids[i - 2] = getpid();
+
+            //int fifo_fd = open("fifo", O_WRONLY);
+            //if (fifo_fd < 0) 
+            //perror("open");
+            //dup2(fifo_fd, 1);
             
             execlp("grep", "grep", argv[1], argv[i], NULL);
 
@@ -30,5 +35,17 @@ int main(int argc, char *argv[]) {
                 kill(pids[i], SIGKILL);
         }
     }
+
+    //int fifo_fd = open("fifo", O_RDONLY);
+    //if (fifo_fd < 0) 
+    //    perror("open");
+
+    //char buf[1024];
+    //int bytes;
+    //while ((bytes = read(fifo_fd, buf, bytes)) > 0)
+    //{
+    //    write(1, buf, bytes);        
+    //}
+
     return 0;
 }
