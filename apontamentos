@@ -1,0 +1,68 @@
+Escalonamento:
+    -job pool: tarefas a espera de virem para memoria
+    -job scheduler: escolhe quais tarefas vêm para memoria (escalonador de tarefas)
+    -CPU scheduler: atribui tempo de CPU às tarefas em memoria (escalonador de CPU)
+
+Trap: erro numa instrução || pedido de codigo ultizador a um serviço do SO
+
+SO moderno:
+    -modo ultizador
+    -modo kernel
+
+PCB: process control block armazena info sobre cada processo
+
+cascading termination: não permitir que o filho sobreviva ao pai
+
+Queues para processos:
+    -job queue: todos os processos do sistema
+    -ready queue: todos os processos em memoria e a espera de executar
+    -device queues: processos a espera de I/O num dispositivo (um para cada dispositivo)
+
+Swapping
+    suspender processo - swap out
+    trazer processo de volta - swap in
+
+    -mais 2 estados possiveis:
+        -pronto suspendido
+        -bloqueado suspendido
+
+Transiçoes de estados:
+    -novo -> pronto
+    -novo -> pronto suspendido
+    -pronto -> correr
+    -pronto -> terminado
+    -pronto -> pronto suspendido
+    -correr -> pronto
+    -correr -> bloqueado
+    -correr -> terminado
+    -bloqueado -> pronto
+    -bloqueado -> bloquado suspendido
+    -bloqueado suspendido -> pronto suspendido
+    -bloqueado suspendido -> bloqueado
+    -pronto suspendido -> pronto
+
+escalonador longo-prazo -> job scheduler
+escalonador curto-prazo -> cpu scheduler
+escalonador medio-prazo -> 
+
+processo I/O-bound -> gasta mais tempo em I/O do que em computação, muitos periodos curtos de uso de cpu
+processo CPU-bound -> gasta mais tempo em computação, poucos periodos longos de uso de cpu
+
+Dispatcher: dá contro do processo ao processo escolido pelo escalonador de CPU
+
+Latencia de despacho: tempo que o dispatcher demora a parar um processo e recomeçar a correr outro
+
+FCFS(first-come first-server):
+    Função de seleção: processo que está há mais tempo na ready queue
+    ->tempo medio de espera (e turnaround) é maior se processos demorados chegam primeiro
+    ->muito sensivel à ordem pela qual chegam os processos
+
+SFS(shortest job first):
+    Função de seleção: Processo com o mais curto burst de CPU esperado
+    -> I/O-bound tem preferencia tipicamente
+
+SRT(shortest remaining time(SJF com desafectação)
+    Função de seleção: Processo com o burst(restante) mais curto de CPU esperado
+    ->
+
+16
