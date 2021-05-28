@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "aurrasd.h"
+//#include "parse_entry.h"
 
 //server
 int main(int argc, char * argv[]) {
@@ -14,15 +15,9 @@ int main(int argc, char * argv[]) {
 
     setup();
 
-    /**
-     * Ler do extremo de leitura do fifo e escrever para o stdout
-    */
-    char buf[1024];
-    int bytes_read;
 
-    while ((bytes_read = read(rd_fifo, buf, 1024)) > 0) {
-        write(1, buf, bytes_read);
-    }
+    debug(rd_fifo);
+
 
     return 0;
 }
@@ -87,4 +82,25 @@ void shutdown() {
      * Apagar o fifo
     */
     unlink("fifo");
+}
+
+void debug(int fd) {
+
+    char buf[1024];
+
+    int line_bytes = 0;
+
+    while ((line_bytes = readln(fd, buf, 1024)) > 0) {
+        //escrever para o ecra
+        write(STDOUT_FILENO, buf, line_bytes);
+    }
+
+    /**
+     * Ler do extremo de leitura do fifo e escrever para o stdout
+    */
+    //char buf[1024];
+    //int bytes_read;
+    //while ((bytes_read = read(rd_fifo, buf, 1024)) > 0) {
+    //    write(1, buf, bytes_read);
+    //}
 }

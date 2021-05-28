@@ -1,3 +1,4 @@
+//#include "parse_entry.h"
 
 /**
  * Variaveis globais
@@ -36,3 +37,8 @@ void setup();
  * Apaga fifo
 */
 void shutdown();
+
+/**
+ * 
+*/
+void debug(int fd);

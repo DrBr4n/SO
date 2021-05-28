@@ -6,7 +6,7 @@
 #include <fcntl.h>  //O_WRONLY etc..
 #include <unistd.h> //open and close
 
-//client
+//clientrm
 int main(int argc, char * argv[]) {
 
     /**
