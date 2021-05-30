@@ -2,12 +2,15 @@
 
 /**
  * Variaveis globais
- * @param rd_fifo descritor de ficheiro para extremo de leitura do fifo
- * @param wr_fifo descritor de ficheiro para extremo de escrita do fifo
+ * @param rd_fifoCS descritor de ficheiro para extremo de leitura do fifo client -> server
+ * @param wr_fifoCS descritor de ficheiro para extremo de escrita do fifo client -> server
+ * @param rd_fifoSC descritor de ficheiro para extremo de leitura do fifo server -> client
+ * @param wr_fifoSC descritor de ficheiro para extremo de escrita do fifo server -> client
 */
-int rd_fifo;
-int wr_fifo;
-
+int rd_fifoCS;
+int wr_fifoCS;
+int rd_fifoSC;
+int wr_fifoSC;
 
 /**
  * Handler para o sinal SIGINT
@@ -42,3 +45,13 @@ void shutdown();
  * 
 */
 void debug(int fd);
+
+/**
+ * 
+*/
+void parse_entry(char* buf);
+
+/**
+ * 
+*/
+void status();

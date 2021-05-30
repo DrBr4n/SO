@@ -6,30 +6,63 @@
 #include <fcntl.h>  //O_WRONLY etc..
 #include <unistd.h> //open and close
 
-//clientrm
+//client
 int main(int argc, char * argv[]) {
 
     /**
      * Criar descritor de ficheiro para o extremo de escrita do fifo
-     * Tecnica para o servidor ficar sempre aberto
     */
-    int wr_fifo = open("fifo", O_WRONLY);
-    if (wr_fifo < 0) perror("Erro ao abrir fifo em modo escrita\n");
+    int wr_fifoCS = open("fifoCS", O_WRONLY);
+    if (wr_fifoCS < 0) perror("Erro ao abrir fifo em modo escrita\n");
 
 
     /**
-     * Enviar linha para o servidor
+     * Contar numero de bytes da linha
     */
     int nbytes = 0;
-    for (int i = 0; argv[1][i] != 0; i++) {
+    for (int i = 1; i < argc; i++) {
+        for (int k = 0; argv[i][k] != 0; k++) {
+            nbytes++;
+        }
         nbytes++;
     }
-    //dar new line ao fim de cada mensagem
-    strcat(argv[1], "\n");
-    nbytes += 2;
-    write(wr_fifo, argv[1], nbytes);
+    nbytes++;
 
-    close(wr_fifo);
+    /**
+     * Concatenar todos os argvs necessarios numa linha
+    */
+    char * res = malloc(nbytes * sizeof(char));
+    for (int i = 1; i < argc; i++) {
+        strcat(res, argv[i]);
+        strcat(res, " ");
+    }
+    //strcat(res, "\n");
 
+    /**
+     * Escrever a mensagem para o fifo
+    */
+    write(wr_fifoCS, res, nbytes);
+
+    /**
+     * Libertar memoria
+     * Fechar descritores abertos
+    */
+    free(res);
+    close(wr_fifoCS);
+
+    if (strcmp(argv[1], "status") == 0) {
+        int rd_fifoSC = open("fifoSC", O_RDONLY);
+        if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
+
+        char buf[1024];
+        int bytes_read;
+
+        while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
+            write(1, buf, bytes_read);
+        }
+
+        close(rd_fifoSC);
+    }
+    
     return 0;
 }

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
 #include "aurrasd.h"
-//#include "parse_entry.h"
 
 //server
 int main(int argc, char * argv[]) {
@@ -16,7 +16,7 @@ int main(int argc, char * argv[]) {
     setup();
 
 
-    debug(rd_fifo);
+    debug(rd_fifoCS);
 
 
     return 0;
@@ -35,7 +35,7 @@ void sigterm_handler(int signum) {
 
 void loadConf(char * name) {
 
-    int conf = open(name, O_RDONLY);
+    //int conf = open(name, O_RDONLY);
 
 }
 
@@ -48,59 +48,113 @@ void setup() {
     if(signal(SIGTERM, sigterm_handler) == SIG_ERR) perror("Erro na associacao do handler do SIGTERM");
 
     /**
-     * Criar o nammed pipe com o nome fifo
+     * Criar os nammed pipes
     */
-    if(mkfifo("fifo", 0666) < 0) perror("mkfifo\n");
+    if(mkfifo("fifoCS", 0666) < 0) perror("mkfifoCS\n");
+    if(mkfifo("fifoSC", 0666) < 0) perror("mkfifoSC\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de leitura do fifo
     */
-    rd_fifo = open("fifo", O_RDONLY);
-    if ((rd_fifo < 0)) perror("Erro ao abrir fifo em modo leitura\n");
+    rd_fifoCS = open("fifoCS", O_RDONLY);
+    if ((rd_fifoCS < 0)) perror("Erro ao abrir fifoCS em modo leitura\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de escrita do fifo
      * Tecnica para o servidor ficar sempre aberto
     */
-    wr_fifo = open("fifo", O_WRONLY);
-    if ((wr_fifo < 0)) perror("Erro ao abrir fifo em modo escrita\n");
+    wr_fifoCS = open("fifoCS", O_WRONLY);
+    if ((wr_fifoCS < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 }
 
 void shutdown() {
     /**
      * Fechar o descritor de ficheiro do extremo de leitura do fifo
     */
-    close(rd_fifo);
+    close(rd_fifoCS);
 
     /**
      * Fechar o descritor de ficheiro do extremo de escrita do fifo
      * Causa o fecho do servidor
     */
-    close(wr_fifo);
+    close(wr_fifoCS);
 
     /**
-     * Apagar o fifo
+     * Apagar os fifos
     */
-    unlink("fifo");
+    unlink("fifoCS");
+    unlink("fifoSC");
 }
 
 void debug(int fd) {
 
-    char buf[1024];
-
-    int line_bytes = 0;
-
-    while ((line_bytes = readln(fd, buf, 1024)) > 0) {
-        //escrever para o ecra
-        write(STDOUT_FILENO, buf, line_bytes);
-    }
-
     /**
      * Ler do extremo de leitura do fifo e escrever para o stdout
     */
-    //char buf[1024];
-    //int bytes_read;
-    //while ((bytes_read = read(rd_fifo, buf, 1024)) > 0) {
-    //    write(1, buf, bytes_read);
+    char buf[1024];
+    int bytes_read;
+
+    while ((bytes_read = read(fd, buf, 1024)) > 0) {
+
+        parse_entry(buf);
+
+    }
+}
+
+void parse_entry(char* buf) {
+    int numBytes[10];
+    int nArgs = 0;
+    int bytes = 0;
+
+    //conta quantos argumentos existem e quantos bytes cada um tem
+    for (int i = 0; buf[i] != '\0'; i++) {
+        if (buf[i] == ' ') {
+            nArgs++;
+            bytes = 0;
+        }
+        else {
+            bytes++;
+            numBytes[nArgs] = bytes;
+        }
+    }
+
+    char * args[nArgs];
+    int c = 0;
+
+    //aloca o numero de bytes necessarios para cada arg e preenche o com a string
+    for (int i = 0; i < nArgs; i++) {
+        args[i] = malloc(numBytes[i] * sizeof(char));
+        for (int k = 0; buf[c] != ' '; k++, c++) {
+            args[i][k] = buf[c];
+        }
+        c++;
+    }
+
+    //for (int i = 0; i < nArgs; i++) {
+    //    printf("args[%d]: %s\n", i, args[i]);
     //}
+
+    if (strcmp(args[0], "status") == 0) {
+        status();
+    }
+    
+    //if (fork() == 0) {
+    //    
+    //    execlp(args[0], args[0], args[1], NULL);
+    //    _exit(0);
+    //}
+}
+
+void status() {
+    wr_fifoSC = open("fifoSC", O_WRONLY);
+    if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
+
+    char * buffer = "this is some \ndummy text\njust\nto see";
+    int nbytes = 0;
+    for (; buffer[nbytes] != '\0'; nbytes++)
+
+    write(wr_fifoSC, buffer, 10);
+
+
+    close(wr_fifoSC);
 }
