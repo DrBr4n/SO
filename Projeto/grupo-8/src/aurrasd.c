@@ -130,9 +130,9 @@ void parse_entry(char* buf) {
         c++;
     }
 
-    //for (int i = 0; i < nArgs; i++) {
-    //    printf("args[%d]: %s\n", i, args[i]);
-    //}
+    for (int i = 0; i < nArgs; i++) {
+        printf("args[%d]: %s\n", i, args[i]);
+    }
 
     if (strcmp(args[0], "status") == 0) {
         status();

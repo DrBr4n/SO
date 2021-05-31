@@ -55,7 +55,7 @@ int main(int argc, char * argv[]) {
         if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
 
         char buf[1024];
-        int bytes_read;
+        int bytes_read = 0;
 
         while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
             write(1, buf, bytes_read);
