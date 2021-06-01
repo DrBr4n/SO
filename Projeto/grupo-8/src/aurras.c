@@ -12,6 +12,7 @@ int main(int argc, char * argv[]) {
     if (argc == 1) {
         printf("./aurras status\n./aurras transform input-filename output-filename filter-id-1 filter-id-2 ...\n");
         return 0;
+        
     }
 
 

@@ -55,3 +55,5 @@ void parse_entry(char* buf);
  * 
 */
 void status();
+
+void comandoSingular(char** args);

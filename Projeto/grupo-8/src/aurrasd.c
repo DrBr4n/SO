@@ -130,6 +130,7 @@ void parse_entry(char* buf) {
         c++;
     }
 
+    comandoSingular(args);
     for (int i = 0; i < nArgs; i++) {
         printf("args[%d]: %s\n", i, args[i]);
     }
@@ -149,12 +150,47 @@ void status() {
     wr_fifoSC = open("fifoSC", O_WRONLY);
     if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
-    char * buffer = "this is some \ndummy text\njust\nto see";
+    char * buffer = "this is some \ndummy text\njust\nto see\n ";
     int nbytes = 0;
-    for (; buffer[nbytes] != '\0'; nbytes++)
+    for (; buffer[nbytes] != '\0'; nbytes++);
 
-    write(wr_fifoSC, buffer, 10);
+    write(wr_fifoSC, buffer, nbytes);
 
 
     close(wr_fifoSC);
 }
+
+void comandoSingular(char* args[]) {
+    if (fork() == 0) {
+        //int fd = open("teste", O_CREAT, 0666);
+        //printf("no comando");
+        //char * r = "< ";
+        //r = strcat(r, args[1]);
+        //args[1] = strcat(r, " >");
+
+        //printf("Conaargs[1]%s\n", args[1]);
+        //printf("Conaargs[2]%s\n", args[2]);
+
+        //char * argv[]= {  
+        //    "aurrasd-echo", 
+        //    args[1],
+        //    args[2],
+        //    NULL
+        //};
+        //execv("bin/aurrasd-filters/", argv);
+        execl("aurrasd-filters/aurrasd-echo", "aurrasd-echo", "< ../../samples/sample-1-so.m4a >", "output.mp3", NULL);
+        _exit(1);
+        //./aurrasd-echo < ../../samples/sample-1-so.m4a > output.mp3
+
+    }
+}
+//bash$ bin/aurrasd-filters/aurrasd-echo < samples/samples-1.m4a > output.mp3
+/*
+./aurras transform samples/sample-1.m4a output.m4a alto eco rapido
+args[0]: transform
+args[1]: samples/sample-1.m4a
+args[2]: output.m4a
+args[3]: alto
+args[4]: eco
+args[5]: rapido
+*/
