@@ -131,6 +131,7 @@ void parse_entry(char* buf) {
     }
 
     comandoSingular(args);
+
     for (int i = 0; i < nArgs; i++) {
         printf("args[%d]: %s\n", i, args[i]);
     }
@@ -162,35 +163,20 @@ void status() {
 
 void comandoSingular(char* args[]) {
     if (fork() == 0) {
-        //int fd = open("teste", O_CREAT, 0666);
-        //printf("no comando");
+        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-gain-half";
+
+        char * argv[]= {
+            path,
+            "< /home/bruno/Documents/SO/Projeto/grupo-8/samples/sample-1-so.m4a >",
+            "/home/bruno/Documents/SO/Projeto/grupo-8/tmp/output.mp3",
+            NULL,
+        };
+        execv(path, argv);
+    }
+
+
         //char * r = "< ";
         //r = strcat(r, args[1]);
         //args[1] = strcat(r, " >");
-
-        //printf("Conaargs[1]%s\n", args[1]);
-        //printf("Conaargs[2]%s\n", args[2]);
-
-        //char * argv[]= {  
-        //    "aurrasd-echo", 
-        //    args[1],
-        //    args[2],
-        //    NULL
-        //};
-        //execv("bin/aurrasd-filters/", argv);
-        execl("aurrasd-filters/aurrasd-echo", "aurrasd-echo", "< ../../samples/sample-1-so.m4a >", "output.mp3", NULL);
-        _exit(1);
-        //./aurrasd-echo < ../../samples/sample-1-so.m4a > output.mp3
-
-    }
+        //_exit(1);
 }
-//bash$ bin/aurrasd-filters/aurrasd-echo < samples/samples-1.m4a > output.mp3
-/*
-./aurras transform samples/sample-1.m4a output.m4a alto eco rapido
-args[0]: transform
-args[1]: samples/sample-1.m4a
-args[2]: output.m4a
-args[3]: alto
-args[4]: eco
-args[5]: rapido
-*/
