@@ -35,8 +35,12 @@ void sigterm_handler(int signum) {
 
 void loadConf(char * name) {
 
-    //int conf = open(name, O_RDONLY);
+    int conf = open(name, O_RDONLY);
 
+    char buffer[1024];
+    read(conf, buffer,1024);
+
+    printf("buffer: %s", buffer);
 }
 
 void setup() {
@@ -163,20 +167,17 @@ void status() {
 
 void comandoSingular(char* args[]) {
     if (fork() == 0) {
-        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-gain-half";
 
-        char * argv[]= {
-            path,
-            "< /home/bruno/Documents/SO/Projeto/grupo-8/samples/sample-1-so.m4a >",
-            "/home/bruno/Documents/SO/Projeto/grupo-8/tmp/output.mp3",
-            NULL,
-        };
-        execv(path, argv);
+        int input = open("/home/bruno/Documents/SO/Projeto/grupo-8/samples/sample-1-so.m4a", O_RDWR);
+        int output = open("/home/bruno/Documents/SO/Projeto/grupo-8/tmp/output.mp3", O_WRONLY | O_CREAT , 0666);
+        dup2(input, 0);
+        dup2(output, 1);    
+        close(input);
+        close(output);
+
+        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters";
+
+        char * argv[]= {"aurrasd-echo", NULL};
+        execvp(path, argv);
     }
-
-
-        //char * r = "< ";
-        //r = strcat(r, args[1]);
-        //args[1] = strcat(r, " >");
-        //_exit(1);
 }
