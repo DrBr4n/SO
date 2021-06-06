@@ -175,9 +175,12 @@ void comandoSingular(char* args[]) {
         close(input);
         close(output);
 
-        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters";
+        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-echo";
 
         char * argv[]= {"aurrasd-echo", NULL};
+
+        sleep(30);
+
         execvp(path, argv);
     }
 }
