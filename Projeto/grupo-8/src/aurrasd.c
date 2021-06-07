@@ -207,3 +207,41 @@ void oneFilter(char* args[]) { //processos estao a ficar em modo zombie (<defunc
     }
     //else wait(NULL);
 }
+
+void multFilter(char* args[], int nArgs) { //ver desenho do stor para o exercicio de encadeamento de comandos
+
+    int nTransf = nArgs - 4;
+
+    int pipefd[2];
+    pipe(pipefd);
+
+    if (fork() == 0) {
+
+        if (fork() == 0) {
+
+            if (fork() == 0) {
+                close(pipefd[0]);
+
+                int input = open(args[1], O_RDWR);
+                dup2(input, 0);
+                close(input);
+                dup2(pipefd[1], 1);    
+                close(pipefd[1]);
+
+            }
+
+            wait(NULL);
+            dup2(pipefd[0], 0);
+            dup2(pipefd[1], 1);
+        }
+        wait(NULL);
+
+        close(pipefd[1]);
+
+        int output = open(args[2], O_WRONLY | O_CREAT , 0666); 
+        dup2(output, 1);    
+        close(output);
+
+        dup2(pipefd[0], 0);
+    }
+}

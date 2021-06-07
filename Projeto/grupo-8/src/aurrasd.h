@@ -71,3 +71,8 @@ void status();
  * 
 */
 void oneFilter(char** args);
+
+/**
+ * 
+*/
+void multFilter(char** args, int nArgs);
