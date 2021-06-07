@@ -12,6 +12,17 @@ int wr_fifoCS;
 int rd_fifoSC;
 int wr_fifoSC;
 
+struct confs
+{
+    char * alto;
+    char * baixo;
+    char * eco;
+    char * rapido;
+    char * lento;
+};
+
+struct confs config;
+
 /**
  * Handler para o sinal SIGINT
 */

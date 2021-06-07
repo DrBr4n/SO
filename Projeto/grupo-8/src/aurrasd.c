@@ -11,7 +11,7 @@
 //server
 int main(int argc, char * argv[]) {
 
-    //loadConf("../etc/aurrasd.conf");
+    loadConf("../etc/aurrasd.conf");
 
     setup();
 
@@ -33,14 +33,21 @@ void sigterm_handler(int signum) {
     //kill(getpid(), SIGKILL);
 }
 
-void loadConf(char * name) {
+void loadConf(char * name) { //configs hardcoded
 
-    int conf = open(name, O_RDONLY);
+    //int conf = open(name, O_RDONLY);
 
-    char buffer[1024];
-    read(conf, buffer,1024);
+    //char buffer[1024];
+    //read(conf, buffer,1024);
 
-    printf("buffer: %s", buffer);
+    //printf("buffer: %s", buffer);
+
+    config.alto = "aurrasd-gain-double";
+    config.baixo = "aurrasd-gain-half";
+    config.eco = "aurrasd-echo";
+    config.rapido = "aurrasd-tempo-double";
+    config.lento = "aurrasd-tempo-half";
+
 }
 
 void setup() {
@@ -134,8 +141,6 @@ void parse_entry(char* buf) {
         c++;
     }
 
-    comandoSingular(args);
-
     for (int i = 0; i < nArgs; i++) {
         printf("args[%d]: %s\n", i, args[i]);
     }
@@ -143,12 +148,10 @@ void parse_entry(char* buf) {
     if (strcmp(args[0], "status") == 0) {
         status();
     }
-    
-    //if (fork() == 0) {
-    //    
-    //    execlp(args[0], args[0], args[1], NULL);
-    //    _exit(0);
-    //}
+
+    if (strcmp(args[0], "transform") == 0) {
+        comandoSingular(args);
+    }
 }
 
 void status() {
@@ -165,19 +168,36 @@ void status() {
     close(wr_fifoSC);
 }
 
-void comandoSingular(char* args[]) {
+void comandoSingular(char* args[]) { //processos está a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
     if (fork() == 0) {
 
-        int input = open("/home/bruno/Documents/SO/Projeto/grupo-8/samples/sample-1-so.m4a", O_RDWR);
-        int output = open("/home/bruno/Documents/SO/Projeto/grupo-8/tmp/output.mp3", O_WRONLY | O_CREAT , 0666);
+        int input = open(args[1], O_RDWR); //"../samples/sample-1-so.m4a"
+        int output = open(args[2], O_WRONLY | O_CREAT , 0666); //"../tmp/output.mp3"
         dup2(input, 0);
-        dup2(output, 1);    
         close(input);
+        dup2(output, 1);    
         close(output);
 
-        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-echo";
+        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/";
+        char * argv[] = {"aurrasd-gain-double", NULL};
 
-        char * argv[]= {"aurrasd-echo", NULL};
+        if (strcmp(args[3], "alto")) {
+            path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-gain-double";
+            argv[0] = "aurrasd-gain-double";
+        }
+        else if (strcmp(args[3], "baixo")) {
+            path = strcat(path, config.baixo);
+        }
+        else if (strcmp(args[3], "eco")) {
+            path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-echo";
+            argv[0] = "aurrasd-echo";
+        }
+        else if (strcmp(args[3], "rapido")) {
+            path = strcat(path, config.rapido);
+        }
+        else if (strcmp(args[3], "lento")) {
+            path = strcat(path, config.lento);
+        }
 
         sleep(30);
 
