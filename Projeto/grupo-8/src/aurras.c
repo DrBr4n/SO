@@ -15,13 +15,12 @@ int main(int argc, char * argv[]) {
         
     }
 
-
     /**
      * Criar descritor de ficheiro para o extremo de escrita do fifo
     */
-    int wr_fifoCS = open("fifoCS", O_WRONLY);
+    int wr_fifoCS = open("fifoCS", O_WRONLY); //caso chame o programa dentro da pasta bin (./aurras)
+    if (wr_fifoCS < 0) wr_fifoCS = open("bin/fifoCS", O_WRONLY); //caso chame o programa fora da pasta bin (bin/aurras)
     if (wr_fifoCS < 0) perror("Erro ao abrir fifo em modo escrita\n");
-
 
     /**
      * Contar numero de bytes da linha
@@ -59,6 +58,7 @@ int main(int argc, char * argv[]) {
 
     if (strcmp(argv[1], "status") == 0) {
         int rd_fifoSC = open("fifoSC", O_RDONLY);
+        if (rd_fifoSC < 0) rd_fifoSC = open("bin/fifoSC", O_RDONLY);
         if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
 
         char buf[1024];

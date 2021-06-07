@@ -6,18 +6,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include "aurrasd.h"
 
 //server
 int main(int argc, char * argv[]) {
 
+    filterPath = argv[2];
+
     loadConf("../etc/aurrasd.conf");
 
     setup();
 
-
     debug(rd_fifoCS);
-
 
     return 0;
 }
@@ -150,7 +151,7 @@ void parse_entry(char* buf) {
     }
 
     if (strcmp(args[0], "transform") == 0) {
-        comandoSingular(args);
+        oneFilter(args);
     }
 }
 
@@ -168,39 +169,41 @@ void status() {
     close(wr_fifoSC);
 }
 
-void comandoSingular(char* args[]) { //processos está a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
+void oneFilter(char* args[]) { //processos estao a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
     if (fork() == 0) {
 
-        int input = open(args[1], O_RDWR); //"../samples/sample-1-so.m4a"
-        int output = open(args[2], O_WRONLY | O_CREAT , 0666); //"../tmp/output.mp3"
+        int input = open(args[1], O_RDWR);
+        int output = open(args[2], O_WRONLY | O_CREAT , 0666); 
         dup2(input, 0);
         close(input);
         dup2(output, 1);    
         close(output);
 
-        char * path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/";
-        char * argv[] = {"aurrasd-gain-double", NULL};
+        char * path = filterPath;
+        char * argv[] = {"", NULL};
 
-        if (strcmp(args[3], "alto")) {
-            path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-gain-double";
-            argv[0] = "aurrasd-gain-double";
+        if (!strcmp(args[3], "alto")) {
+            strcat(path, config.alto);
+            argv[0] = config.alto;
         }
-        else if (strcmp(args[3], "baixo")) {
-            path = strcat(path, config.baixo);
+        else if (!strcmp(args[3], "baixo")) {
+            strcat(path, config.baixo);
+            argv[0] = config.baixo;
         }
-        else if (strcmp(args[3], "eco")) {
-            path = "/home/bruno/Documents/SO/Projeto/grupo-8/bin/aurrasd-filters/aurrasd-echo";
-            argv[0] = "aurrasd-echo";
+        else if (!strcmp(args[3], "eco")) {
+            strcat(path, config.eco);
+            argv[0] = config.eco;
         }
-        else if (strcmp(args[3], "rapido")) {
-            path = strcat(path, config.rapido);
+        else if (!strcmp(args[3], "rapido")) {
+            strcat(path, config.rapido);
+            argv[0] = config.rapido;
         }
-        else if (strcmp(args[3], "lento")) {
-            path = strcat(path, config.lento);
+        else if (!strcmp(args[3], "lento")) {
+            strcat(path, config.lento);
+            argv[0] = config.lento;
         }
-
-        sleep(30);
 
         execvp(path, argv);
     }
+    //else wait(NULL);
 }

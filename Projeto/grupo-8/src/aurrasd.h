@@ -11,9 +11,9 @@ int rd_fifoCS;
 int wr_fifoCS;
 int rd_fifoSC;
 int wr_fifoSC;
+char * filterPath;
 
-struct confs
-{
+struct confs {
     char * alto;
     char * baixo;
     char * eco;
@@ -67,4 +67,7 @@ void parse_entry(char* buf);
 */
 void status();
 
-void comandoSingular(char** args);
+/**
+ * 
+*/
+void oneFilter(char** args);
