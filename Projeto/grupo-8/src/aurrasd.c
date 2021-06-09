@@ -12,9 +12,10 @@
 //server
 int main(int argc, char * argv[]) {
 
-    loadConf(argv[1]);
-
+    configPath = argv[1];
     filterPath = argv[2];
+
+    loadConf(configPath); 
 
     setup();
 
@@ -26,7 +27,6 @@ int main(int argc, char * argv[]) {
         parse_entry(buf);
 
     }
-
 
     return 0;
 }
@@ -51,11 +51,11 @@ void loadConf(char * name) { //configs hardcoded
 
     //printf("buffer: %s", buffer);
 
-    config.alto = "aurrasd-gain-double";
-    config.baixo = "aurrasd-gain-half";
-    config.eco = "aurrasd-echo";
-    config.rapido = "aurrasd-tempo-double";
-    config.lento = "aurrasd-tempo-half";
+    //config.alto = "aurrasd-gain-double";
+    //config.baixo = "aurrasd-gain-half";
+    //config.eco = "aurrasd-echo";
+    //config.rapido = "aurrasd-tempo-double";
+    //config.lento = "aurrasd-tempo-half";
 
 }
 
@@ -135,6 +135,14 @@ void parse_entry(char* buf) {
         c++;
     }
 
+    args[nArgs] = malloc(sizeof(char *));
+    args[nArgs++] = configPath;
+    args[nArgs] = malloc(sizeof(char *));
+    args[nArgs++] = filterPath;
+    args[nArgs] = malloc(sizeof(NULL));
+    args[nArgs++] = NULL;
+
+    //FOR DEBUG, printing args on server
     for (int i = 0; i < nArgs; i++) {
         printf("args[%d]: %s\n", i, args[i]);
     }
@@ -144,7 +152,7 @@ void parse_entry(char* buf) {
     }
 
     if (strcmp(args[0], "transform") == 0) {
-        oneFilter(args);
+        transform(args);
     }
 
     //addToQueue();
@@ -164,52 +172,12 @@ void status() {
     close(wr_fifoSC);
 }
 
-void oneFilter(char* args[]) { //processos estao a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
+void transform (char ** args) {
+
     if (fork() == 0) {
+        
+        execv("transform", args);
 
-        int input = open(args[1], O_RDWR);
-        int output = open(args[2], O_WRONLY | O_CREAT , 0666); 
-        dup2(input, 0);
-        close(input);
-        dup2(output, 1);    
-        close(output);
-
-        char * path = filterPath;
-        char * argv[] = {"", NULL};
-
-        if (!strcmp(args[3], "alto")) {
-            strcat(path, config.alto);
-            argv[0] = config.alto;
-        }
-        else if (!strcmp(args[3], "baixo")) {
-            strcat(path, config.baixo);
-            argv[0] = config.baixo;
-        }
-        else if (!strcmp(args[3], "eco")) {
-            strcat(path, config.eco);
-            argv[0] = config.eco;
-        }
-        else if (!strcmp(args[3], "rapido")) {
-            strcat(path, config.rapido);
-            argv[0] = config.rapido;
-        }
-        else if (!strcmp(args[3], "lento")) {
-            strcat(path, config.lento);
-            argv[0] = config.lento;
-        }
-
-        execvp(path, argv);
     }
-    //else wait(NULL);
+
 }
-
-
-//search map
-
-
-/*
-
-cliente -> agregador (poe comandos numa struct) -> servidor (lê da estrutura e executa) 
-
-*/
-
