@@ -55,11 +55,6 @@ void shutdown();
 /**
  * 
 */
-void debug(int fd);
-
-/**
- * 
-*/
 void parse_entry(char* buf);
 
 /**

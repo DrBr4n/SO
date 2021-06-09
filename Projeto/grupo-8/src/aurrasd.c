@@ -12,13 +12,21 @@
 //server
 int main(int argc, char * argv[]) {
 
-    filterPath = argv[2];
+    loadConf(argv[1]);
 
-    loadConf("../etc/aurrasd.conf");
+    filterPath = argv[2];
 
     setup();
 
-    debug(rd_fifoCS);
+    char buf[1024];
+    int bytes_read;
+
+    while ((bytes_read = read(rd_fifoCS, buf, 1024)) > 0) {
+
+        parse_entry(buf);
+
+    }
+
 
     return 0;
 }
@@ -98,21 +106,6 @@ void shutdown() {
     unlink("fifoSC");
 }
 
-void debug(int fd) {
-
-    /**
-     * Ler do extremo de leitura do fifo e escrever para o stdout
-    */
-    char buf[1024];
-    int bytes_read;
-
-    while ((bytes_read = read(fd, buf, 1024)) > 0) {
-
-        parse_entry(buf);
-
-    }
-}
-
 void parse_entry(char* buf) {
     int numBytes[10];
     int nArgs = 0;
@@ -153,6 +146,8 @@ void parse_entry(char* buf) {
     if (strcmp(args[0], "transform") == 0) {
         oneFilter(args);
     }
+
+    //addToQueue();
 }
 
 void status() {
@@ -207,3 +202,14 @@ void oneFilter(char* args[]) { //processos estao a ficar em modo zombie (<defunc
     }
     //else wait(NULL);
 }
+
+
+//search map
+
+
+/*
+
+cliente -> agregador (poe comandos numa struct) -> servidor (lê da estrutura e executa) 
+
+*/
+
