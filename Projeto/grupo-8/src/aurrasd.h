@@ -1,5 +1,3 @@
-//#include "parse_entry.h"
-
 /**
  * Variaveis globais
  * @param rd_fifoCS descritor de ficheiro para extremo de leitura do fifo client -> server
@@ -12,16 +10,16 @@ int wr_fifoCS;
 int rd_fifoSC;
 int wr_fifoSC;
 char * filterPath;
+char * configPath;
 
-struct confs {
-    char * alto;
-    char * baixo;
-    char * eco;
-    char * rapido;
-    char * lento;
+struct config {
+    char * nome;
+    int max;
+    int current;
 };
 
-struct confs config;
+struct config filtros[5];
+
 
 /**
  * Handler para o sinal SIGINT
@@ -55,11 +53,6 @@ void shutdown();
 /**
  * 
 */
-void debug(int fd);
-
-/**
- * 
-*/
 void parse_entry(char* buf);
 
 /**
@@ -70,9 +63,9 @@ void status();
 /**
  * 
 */
-void oneFilter(char** args);
+void transform(char ** args);
 
 /**
  * 
 */
-void multFilter(char** args, int nArgs);
+ssize_t readln(int fd, char *line, size_t size);

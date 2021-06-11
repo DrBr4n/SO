@@ -1,8 +1,10 @@
-all: server client
+all: server client transform
 
 server: bin/aurrasd
 
 client: bin/aurras
+
+transform: bin/transform
 
 bin/aurrasd: obj/aurrasd.o
 	gcc -g obj/aurrasd.o -o bin/aurrasd
@@ -15,6 +17,12 @@ bin/aurras: obj/aurras.o
 
 obj/aurras.o: src/aurras.c
 	gcc -Wall -g -c src/aurras.c -o obj/aurras.o
+
+bin/transform: obj/transform.o
+	gcc -g obj/transform.o -o bin/transform
+
+obj/transform.o: src/transform.c
+	gcc -Wall -g -c src/transform.c -o obj/transform.o
 
 clean:
 	rm obj/* tmp/* bin/aurras bin/aurrasd

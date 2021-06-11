@@ -12,13 +12,21 @@
 //server
 int main(int argc, char * argv[]) {
 
+    configPath = argv[1];
     filterPath = argv[2];
 
-    loadConf("../etc/aurrasd.conf");
+    loadConf(configPath); 
 
     setup();
 
-    debug(rd_fifoCS);
+    char buf[1024];
+    int bytes_read;
+
+    while ((bytes_read = read(rd_fifoCS, buf, 1024)) > 0) {
+
+        parse_entry(buf);
+
+    }
 
     return 0;
 }
@@ -34,21 +42,24 @@ void sigterm_handler(int signum) {
     //kill(getpid(), SIGKILL);
 }
 
-void loadConf(char * name) { //configs hardcoded
+void loadConf(char * name) { 
 
-    //int conf = open(name, O_RDONLY);
+    int conf = open(name, O_RDONLY);
+    char buffer[60];
+    
+    for (int i = 0; i < 5 ; i++) {
+        
+        readln(conf, buffer, 60);
 
-    //char buffer[1024];
-    //read(conf, buffer,1024);
+        char * subString = strtok(buffer, " ");
 
-    //printf("buffer: %s", buffer);
-
-    config.alto = "aurrasd-gain-double";
-    config.baixo = "aurrasd-gain-half";
-    config.eco = "aurrasd-echo";
-    config.rapido = "aurrasd-tempo-double";
-    config.lento = "aurrasd-tempo-half";
-
+        filtros[i].nome = malloc(sizeof(subString));
+        strcpy(filtros[i].nome , subString);
+        subString = strtok(NULL, " ");
+        subString = strtok(NULL, " ");
+        filtros[i].max = atoi(subString);
+        filtros[i].current = 0;
+    }
 }
 
 void setup() {
@@ -98,50 +109,51 @@ void shutdown() {
     unlink("fifoSC");
 }
 
-void debug(int fd) {
-
-    /**
-     * Ler do extremo de leitura do fifo e escrever para o stdout
-    */
-    char buf[1024];
-    int bytes_read;
-
-    while ((bytes_read = read(fd, buf, 1024)) > 0) {
-
-        parse_entry(buf);
-
-    }
-}
-
 void parse_entry(char* buf) {
-    int numBytes[10];
+
     int nArgs = 0;
     int bytes = 0;
 
+    //conta numero de argumentos
+    for (int i = 0; buf[i] != '\0'; i++) 
+        if (buf[i] == ' ')
+            nArgs++;
+    
+    int numBytes[nArgs];
+
     //conta quantos argumentos existem e quantos bytes cada um tem
+    int indexNumBytes = 0;
     for (int i = 0; buf[i] != '\0'; i++) {
         if (buf[i] == ' ') {
-            nArgs++;
+            indexNumBytes++;
             bytes = 0;
         }
         else {
             bytes++;
-            numBytes[nArgs] = bytes;
+            numBytes[indexNumBytes] = bytes;
         }
     }
 
     char * args[nArgs];
-    int c = 0;
 
     //aloca o numero de bytes necessarios para cada arg e preenche o com a string
+    int index = 0;
     for (int i = 0; i < nArgs; i++) {
         args[i] = malloc(numBytes[i] * sizeof(char));
-        for (int k = 0; buf[c] != ' '; k++, c++) {
-            args[i][k] = buf[c];
+        for (int k = 0; buf[index] != ' '; k++, index++) {
+            args[i][k] = buf[index];
         }
-        c++;
+        index++;
     }
 
+    args[nArgs] = malloc(sizeof(char *));
+    args[nArgs++] = configPath;
+    args[nArgs] = malloc(sizeof(char *));
+    args[nArgs++] = filterPath;
+    args[nArgs] = malloc(sizeof(NULL));
+    args[nArgs++] = NULL;
+
+    //FOR DEBUG, printing args on server
     for (int i = 0; i < nArgs; i++) {
         printf("args[%d]: %s\n", i, args[i]);
     }
@@ -151,8 +163,10 @@ void parse_entry(char* buf) {
     }
 
     if (strcmp(args[0], "transform") == 0) {
-        oneFilter(args);
+        transform(args);
     }
+
+    //addToQueue();
 }
 
 void status() {
@@ -169,79 +183,32 @@ void status() {
     close(wr_fifoSC);
 }
 
-void oneFilter(char* args[]) { //processos estao a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
+void transform (char ** args) {
+
     if (fork() == 0) {
+        
+        execv("transform", args);
 
-        int input = open(args[1], O_RDWR);
-        int output = open(args[2], O_WRONLY | O_CREAT , 0666); 
-        dup2(input, 0);
-        close(input);
-        dup2(output, 1);    
-        close(output);
-
-        char * path = filterPath;
-        char * argv[] = {"", NULL};
-
-        if (!strcmp(args[3], "alto")) {
-            strcat(path, config.alto);
-            argv[0] = config.alto;
-        }
-        else if (!strcmp(args[3], "baixo")) {
-            strcat(path, config.baixo);
-            argv[0] = config.baixo;
-        }
-        else if (!strcmp(args[3], "eco")) {
-            strcat(path, config.eco);
-            argv[0] = config.eco;
-        }
-        else if (!strcmp(args[3], "rapido")) {
-            strcat(path, config.rapido);
-            argv[0] = config.rapido;
-        }
-        else if (!strcmp(args[3], "lento")) {
-            strcat(path, config.lento);
-            argv[0] = config.lento;
-        }
-
-        execvp(path, argv);
     }
-    //else wait(NULL);
+
 }
 
-void multFilter(char* args[], int nArgs) { //ver desenho do stor para o exercicio de encadeamento de comandos
+ssize_t readln(int fd, char *line, size_t size) {
 
-    int nTransf = nArgs - 4;
+    //ler byte a byte do fd(descritor de ficheiro) 
+    int next_pos = 0;
 
-    int pipefd[2];
-    pipe(pipefd);
+    int read_bytes = 0;
 
-    if (fork() == 0) {
+    while (next_pos < size && read(fd, line + next_pos, 1) > 0) {
+        
+        read_bytes++;
+        // - até encontrar \n
+        if (line[next_pos] == '\n') break;
 
-        if (fork() == 0) {
-
-            if (fork() == 0) {
-                close(pipefd[0]);
-
-                int input = open(args[1], O_RDWR);
-                dup2(input, 0);
-                close(input);
-                dup2(pipefd[1], 1);    
-                close(pipefd[1]);
-
-            }
-
-            wait(NULL);
-            dup2(pipefd[0], 0);
-            dup2(pipefd[1], 1);
-        }
-        wait(NULL);
-
-        close(pipefd[1]);
-
-        int output = open(args[2], O_WRONLY | O_CREAT , 0666); 
-        dup2(output, 1);    
-        close(output);
-
-        dup2(pipefd[0], 0);
+        next_pos++;
     }
+  
+    //retornar o numero de bytes lidos
+    return read_bytes; 
 }
