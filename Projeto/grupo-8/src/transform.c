@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -15,24 +16,23 @@ int main(int argc, char * argv[]) {
 
 }
 
-/*
+void loadConf(char * name) {
 
-*/
-void loadConf(char * name) { //configs hardcoded
+    int conf = open(name, O_RDONLY);
+    char buffer[60];
+    
+    for (int i = 0; i < 5 ; i++) {    
 
-    //int conf = open(name, O_RDONLY);
+        readln(conf, buffer, 60);
 
-    //char buffer[1024];
-    //read(conf, buffer,1024);
+        char * subString = strtok(buffer, " ");
+        filtros[i].nome = malloc(sizeof(subString));
+        strcpy(filtros[i].nome , subString);
 
-    //printf("buffer: %s", buffer);
-
-    config.alto = "aurrasd-gain-double";
-    config.baixo = "aurrasd-gain-half";
-    config.eco = "aurrasd-echo";
-    config.rapido = "aurrasd-tempo-double";
-    config.lento = "aurrasd-tempo-half";
-
+        subString = strtok(NULL, " ");
+        filtros[i].exec = malloc(sizeof(subString));
+        strcpy(filtros[i].exec, subString);
+    }
 }
 
 void oneFilter(int nArgs, char* args[]) { //processos estao a ficar em modo zombie (<defunct>), verificar exitstatus ou wait(null) might work
@@ -47,26 +47,32 @@ void oneFilter(int nArgs, char* args[]) { //processos estao a ficar em modo zomb
     char * path = args[nArgs - 1];
     char * argv[] = {"", NULL};
 
-    if (!strcmp(args[3], "alto")) {
-        strcat(path, config.alto);
-        argv[0] = config.alto;
+    for (int i = 0; i < 5; i++) {
+        if(strcmp(args[3], filtros[i].nome) == 0) {
+            strcat(path, filtros[i].exec);
+            argv[0] = filtros[i].exec;
+        }
     }
-    else if (!strcmp(args[3], "baixo")) {
-        strcat(path, config.baixo);
-        argv[0] = config.baixo;
-    }
-    else if (!strcmp(args[3], "eco")) {
-        strcat(path, config.eco);
-        argv[0] = config.eco;
-    }
-    else if (!strcmp(args[3], "rapido")) {
-        strcat(path, config.rapido);
-        argv[0] = config.rapido;
-    }
-    else if (!strcmp(args[3], "lento")) {
-        strcat(path, config.lento);
-        argv[0] = config.lento;
+    
+    execvp(path, argv);
+}
+
+ssize_t readln(int fd, char *line, size_t size) {
+
+    //ler byte a byte do fd(descritor de ficheiro) 
+    int next_pos = 0;
+
+    int read_bytes = 0;
+
+    while (next_pos < size && read(fd, line + next_pos, 1) > 0) {
+        
+        read_bytes++;
+        // - até encontrar \n
+        if (line[next_pos] == '\n') break;
+
+        next_pos++;
     }
 
-    execvp(path, argv);
+    //retornar o numero de bytes lidos
+    return read_bytes;
 }

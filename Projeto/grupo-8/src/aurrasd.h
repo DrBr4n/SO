@@ -12,15 +12,14 @@ int wr_fifoSC;
 char * filterPath;
 char * configPath;
 
-struct confs {
-    char * alto;
-    char * baixo;
-    char * eco;
-    char * rapido;
-    char * lento;
+struct config {
+    char * nome;
+    int max;
+    int current;
 };
 
-struct confs config;
+struct config filtros[5];
+
 
 /**
  * Handler para o sinal SIGINT
@@ -56,4 +55,17 @@ void shutdown();
 */
 void parse_entry(char* buf);
 
+/**
+ * 
+*/
+void status();
+
+/**
+ * 
+*/
 void transform(char ** args);
+
+/**
+ * 
+*/
+ssize_t readln(int fd, char *line, size_t size);

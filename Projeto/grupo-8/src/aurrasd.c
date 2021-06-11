@@ -42,21 +42,24 @@ void sigterm_handler(int signum) {
     //kill(getpid(), SIGKILL);
 }
 
-void loadConf(char * name) { //configs hardcoded
+void loadConf(char * name) { 
 
-    //int conf = open(name, O_RDONLY);
+    int conf = open(name, O_RDONLY);
+    char buffer[60];
+    
+    for (int i = 0; i < 5 ; i++) {
+        
+        readln(conf, buffer, 60);
 
-    //char buffer[1024];
-    //read(conf, buffer,1024);
+        char * subString = strtok(buffer, " ");
 
-    //printf("buffer: %s", buffer);
-
-    //config.alto = "aurrasd-gain-double";
-    //config.baixo = "aurrasd-gain-half";
-    //config.eco = "aurrasd-echo";
-    //config.rapido = "aurrasd-tempo-double";
-    //config.lento = "aurrasd-tempo-half";
-
+        filtros[i].nome = malloc(sizeof(subString));
+        strcpy(filtros[i].nome , subString);
+        subString = strtok(NULL, " ");
+        subString = strtok(NULL, " ");
+        filtros[i].max = atoi(subString);
+        filtros[i].current = 0;
+    }
 }
 
 void setup() {
@@ -132,9 +135,9 @@ void parse_entry(char* buf) {
     }
 
     char * args[nArgs];
-    int index = 0;
 
     //aloca o numero de bytes necessarios para cada arg e preenche o com a string
+    int index = 0;
     for (int i = 0; i < nArgs; i++) {
         args[i] = malloc(numBytes[i] * sizeof(char));
         for (int k = 0; buf[index] != ' '; k++, index++) {
@@ -188,4 +191,24 @@ void transform (char ** args) {
 
     }
 
+}
+
+ssize_t readln(int fd, char *line, size_t size) {
+
+    //ler byte a byte do fd(descritor de ficheiro) 
+    int next_pos = 0;
+
+    int read_bytes = 0;
+
+    while (next_pos < size && read(fd, line + next_pos, 1) > 0) {
+        
+        read_bytes++;
+        // - até encontrar \n
+        if (line[next_pos] == '\n') break;
+
+        next_pos++;
+    }
+
+    //retornar o numero de bytes lidos
+    return read_bytes;
 }
