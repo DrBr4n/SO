@@ -20,6 +20,8 @@ struct config {
 
 struct config filtros[5];
 
+int nFiltros; 
+
 
 /**
  * Handler para o sinal SIGINT

@@ -43,11 +43,12 @@ void sigterm_handler(int signum) {
 }
 
 void loadConf(char * name) { 
+    nFiltros = 5;
 
     int conf = open(name, O_RDONLY);
     char buffer[60];
     
-    for (int i = 0; i < 5 ; i++) {
+    for (int i = 0; i < nFiltros ; i++) {
         
         readln(conf, buffer, 60);
 
@@ -173,12 +174,16 @@ void status() {
     wr_fifoSC = open("fifoSC", O_WRONLY);
     if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
-    char * buffer = "this is some \ndummy text\njust\nto see\n ";
+    //printQueue();
+    char buffer[1024];
     int nbytes = 0;
-    for (; buffer[nbytes] != '\0'; nbytes++);
-
+    for (int i = 0; i < nFiltros; i++) {
+        nbytes = sprintf(buffer, "filter %s: %d/%d (running/max)\n", filtros[i].nome, filtros[i].current, filtros[i].max); 
+        write(wr_fifoSC, buffer, nbytes);
+    }
+    
+    nbytes = sprintf(buffer, "pid: %d\n", getpid());
     write(wr_fifoSC, buffer, nbytes);
-
 
     close(wr_fifoSC);
 }
