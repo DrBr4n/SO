@@ -8,7 +8,12 @@ struct config filtros[5];
 /**
  * 
 */
-void status();
+void loadConf(char * name);
+
+/**
+ * 
+*/
+ssize_t readln(int fd, char *line, size_t size);
 
 /**
  * 
@@ -18,9 +23,5 @@ void oneFilter(int nArgs, char** args);
 /**
  * 
 */
-void loadConf(char * name);
+void multipleFilters(int nArgs, char** args);
 
-/**
- * 
-*/
-ssize_t readln(int fd, char *line, size_t size);
