@@ -40,7 +40,7 @@ int main(int argc, char * argv[]) {
     char * res = malloc(nbytes * sizeof(char));
     for (int i = 1; i < argc; i++) {
         strcat(res, argv[i]);
-        strcat(res, " ");
+        strcat(res, "\n");
     }
     //strcat(res, "\n");
 

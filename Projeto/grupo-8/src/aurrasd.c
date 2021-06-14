@@ -117,7 +117,7 @@ void parse_entry(char* buf) {
 
     //conta numero de argumentos
     for (int i = 0; buf[i] != '\0'; i++) 
-        if (buf[i] == ' ')
+        if (buf[i] == '\n')
             nArgs++;
     
     int numBytes[nArgs];
@@ -125,7 +125,7 @@ void parse_entry(char* buf) {
     //conta quantos argumentos existem e quantos bytes cada um tem
     int indexNumBytes = 0;
     for (int i = 0; buf[i] != '\0'; i++) {
-        if (buf[i] == ' ') {
+        if (buf[i] == '\n') {
             indexNumBytes++;
             bytes = 0;
         }
@@ -141,7 +141,7 @@ void parse_entry(char* buf) {
     int index = 0;
     for (int i = 0; i < nArgs; i++) {
         args[i] = malloc(numBytes[i] * sizeof(char));
-        for (int k = 0; buf[index] != ' '; k++, index++) {
+        for (int k = 0; buf[index] != '\n'; k++, index++) {
             args[i][k] = buf[index];
         }
         index++;
