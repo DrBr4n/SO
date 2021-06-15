@@ -23,5 +23,10 @@ void oneFilter(int nArgs, char** args);
 /**
  * 
 */
-void multipleFilters(int nArgs, char** args);
+void twoFilters(int nArgs, char ** args);
+
+/**
+ * 
+*/
+void apllyFilters(int nArgs, char** args);
 
