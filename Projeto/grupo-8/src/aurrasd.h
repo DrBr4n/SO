@@ -11,6 +11,8 @@ int rd_fifoSC;
 int wr_fifoSC;
 char * filterPath;
 char * configPath;
+char * fifoCS;
+char * fifoSC;
 
 struct config {
     char * nome;
@@ -44,7 +46,7 @@ void loadConf(char * name);
  * Cria fifo
  * Inicializa variaveis globais
 */
-void setup();
+void setup(char * args);
 
 /**
  * Fecha descritores abertos
