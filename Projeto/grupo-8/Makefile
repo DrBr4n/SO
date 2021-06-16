@@ -30,7 +30,6 @@ clean:
 test:
 	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-alto.mp3 alto
 	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-baixo.mp3 baixo
-	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-eco.mp3 eco 
-	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-rapido.mp3 rapido
-	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-lento.mp3 lento
-
+	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-ecoAltoEcoLento.mp3 eco alto eco lento
+	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-rapidoRapidoAltoEco.mp3 rapido rapido alto eco
+	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-altoBaixoEcoRapidoLento.mp3 alto baixo eco rapido lento
