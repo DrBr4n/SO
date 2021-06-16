@@ -14,10 +14,10 @@ int main(int argc, char * argv[]) {
 
     configPath = argv[1];
     filterPath = argv[2];
+    
+    loadConf(configPath);
 
-    loadConf(configPath); 
-
-    setup();
+    setup(argv[0]);
 
     char buf[1024];
     int bytes_read;
@@ -63,7 +63,8 @@ void loadConf(char * name) {
     }
 }
 
-void setup() {
+void setup(char * args) {
+
     /**
      * Associa rotina de tratamento sigint_handler ao sinal SIGINT
      * Associa rotina de tratamento sigterm_handler ao sinal SIGTERM
@@ -74,20 +75,28 @@ void setup() {
     /**
      * Criar os nammed pipes
     */
-    if(mkfifo("fifoCS", 0666) < 0) perror("mkfifoCS\n");
-    if(mkfifo("fifoSC", 0666) < 0) perror("mkfifoSC\n");
+    if (args[0] == '.') {
+        fifoCS = "../tmp/fifoCS";
+        fifoSC = "../tmp/fifoSC";
+    }
+    else {
+        fifoCS = "tmp/fifoCS";
+        fifoSC = "tmp/fifoSC";
+    }
+    if(mkfifo(fifoCS, 0666) < 0) perror("mkfifoCS\n");
+    if(mkfifo(fifoSC, 0666) < 0) perror("mkfifoSC\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de leitura do fifo
     */
-    rd_fifoCS = open("fifoCS", O_RDONLY);
+    rd_fifoCS = open(fifoCS, O_RDONLY);
     if ((rd_fifoCS < 0)) perror("Erro ao abrir fifoCS em modo leitura\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de escrita do fifo
      * Tecnica para o servidor ficar sempre aberto
     */
-    wr_fifoCS = open("fifoCS", O_WRONLY);
+    wr_fifoCS = open(fifoCS, O_WRONLY);
     if ((wr_fifoCS < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 }
 
@@ -106,8 +115,8 @@ void shutdown() {
     /**
      * Apagar os fifos
     */
-    unlink("fifoCS");
-    unlink("fifoSC");
+    unlink(fifoCS);
+    unlink(fifoSC);
 }
 
 void parse_entry(char* buf) {
@@ -117,7 +126,7 @@ void parse_entry(char* buf) {
 
     //conta numero de argumentos
     for (int i = 0; buf[i] != '\0'; i++) 
-        if (buf[i] == ' ')
+        if (buf[i] == '\n')
             nArgs++;
     
     int numBytes[nArgs];
@@ -125,7 +134,7 @@ void parse_entry(char* buf) {
     //conta quantos argumentos existem e quantos bytes cada um tem
     int indexNumBytes = 0;
     for (int i = 0; buf[i] != '\0'; i++) {
-        if (buf[i] == ' ') {
+        if (buf[i] == '\n') {
             indexNumBytes++;
             bytes = 0;
         }
@@ -141,7 +150,7 @@ void parse_entry(char* buf) {
     int index = 0;
     for (int i = 0; i < nArgs; i++) {
         args[i] = malloc(numBytes[i] * sizeof(char));
-        for (int k = 0; buf[index] != ' '; k++, index++) {
+        for (int k = 0; buf[index] != '\n'; k++, index++) {
             args[i][k] = buf[index];
         }
         index++;
@@ -171,7 +180,7 @@ void parse_entry(char* buf) {
 }
 
 void status() {
-    wr_fifoSC = open("fifoSC", O_WRONLY);
+    wr_fifoSC = open(fifoSC, O_WRONLY);
     if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
     //printQueue();
