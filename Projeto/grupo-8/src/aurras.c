@@ -56,20 +56,20 @@ int main(int argc, char * argv[]) {
     free(res);
     close(wr_fifoCS);
 
-    if (strcmp(argv[1], "status") == 0) {
-        int rd_fifoSC = open("../tmp/fifoSC", O_RDONLY);
-        if (rd_fifoSC < 0) rd_fifoSC = open("tmp/fifoSC", O_RDONLY);
-        if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
+    
+    int rd_fifoSC = open("../tmp/fifoSC", O_RDONLY);
+    if (rd_fifoSC < 0) rd_fifoSC = open("tmp/fifoSC", O_RDONLY);
+    if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
 
-        char buf[1024];
-        int bytes_read = 0;
+    char buf[1024];
+    int bytes_read = 0;
 
-        while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
-            write(1, buf, bytes_read);
-        }
-
-        close(rd_fifoSC);
+    while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
+        write(1, buf, bytes_read);
     }
+
+    //close(rd_fifoSC);
+    
     
     return 0;
 }

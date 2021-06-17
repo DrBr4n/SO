@@ -180,31 +180,43 @@ void parse_entry(char* buf) {
 }
 
 void status() {
-    wr_fifoSC = open(fifoSC, O_WRONLY);
-    if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
+    if (fork() == 0) {
+        wr_fifoSC = open(fifoSC, O_WRONLY);
+        if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
-    //printQueue();
-    char buffer[1024];
-    int nbytes = 0;
-    for (int i = 0; i < nFiltros; i++) {
-        nbytes = sprintf(buffer, "filter %s: %d/%d (running/max)\n", filtros[i].nome, filtros[i].current, filtros[i].max); 
+        //printQueue();
+        char buffer[1024];
+        int nbytes = 0;
+        for (int i = 0; i < nFiltros; i++) {
+            nbytes = sprintf(buffer, "filter %s: %d/%d (running/max)\n", filtros[i].nome, filtros[i].current, filtros[i].max); 
+            write(wr_fifoSC, buffer, nbytes);
+        }
+        
+        nbytes = sprintf(buffer, "pid: %d\n", getppid());
         write(wr_fifoSC, buffer, nbytes);
-    }
-    
-    nbytes = sprintf(buffer, "pid: %d\n", getpid());
-    write(wr_fifoSC, buffer, nbytes);
 
-    close(wr_fifoSC);
+        close(wr_fifoSC);
+        _exit(0);
+    }
 }
 
 void transform (char ** args) {
 
     if (fork() == 0) {
-        
-        execv("transform", args);
+        wr_fifoSC = open(fifoSC, O_WRONLY);
+        if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
+        char pending[] = "pending\n";
+        write(wr_fifoSC, pending, sizeof(pending));
+        char processing[] = "processing\n";
+        write(wr_fifoSC, processing, sizeof(processing));
+        if(fork() == 0) {
+            execv("transform", args);
+        }
+        wait(NULL);
+        close(wr_fifoSC);
+        _exit(0);
     }
-
 }
 
 ssize_t readln(int fd, char *line, size_t size) {
