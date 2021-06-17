@@ -11,7 +11,6 @@
 
 //server
 int main(int argc, char * argv[]) {
-
     configPath = argv[1];
     filterPath = argv[2];
     
@@ -39,7 +38,6 @@ void sigint_handler(int signum) {
 void sigterm_handler(int signum) {
     printf("sigterm recebido, encerrando\n");
     shutdown();
-    //kill(getpid(), SIGKILL);
 }
 
 void loadConf(char * name) { 
@@ -87,7 +85,7 @@ void setup(char * args) {
     }
     if(mkfifo(fifoCS, 0666) < 0) perror("mkfifoCS\n");
     if(mkfifo(fifoSC, 0666) < 0) perror("mkfifoSC\n");
-    if(mkfifo(fifoStatus, 0666) < 0) perror("mkfifoSC\n");
+    if(mkfifo(fifoStatus, 0666) < 0) perror("mkfifoStatus\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de leitura do fifo
@@ -165,22 +163,15 @@ void parse_entry(char* buf) {
     args[nArgs] = malloc(sizeof(char *));
     args[nArgs++] = filterPath;
     args[nArgs] = malloc(sizeof(NULL));
-    args[nArgs++] = NULL;
-
-    //FOR DEBUG, printing args on server
-    for (int i = 0; i < nArgs; i++) {
-        printf("args[%d]: %s\n", i, args[i]);
-    }
+    args[nArgs++] = NULL;    
 
     if (strcmp(args[0], "status") == 0) {
         status();
     }
 
     if (strcmp(args[0], "transform") == 0) {
-        transform(args);
+        transform(nArgs, args);
     }
-
-    //addToQueue();
 }
 
 void status() {
@@ -188,7 +179,6 @@ void status() {
         wr_fifoStatus = open(fifoStatus, O_WRONLY);
         if ((wr_fifoStatus < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
-        //printQueue();
         char buffer[1024];
         int nbytes = 0;
         for (int i = 0; i < nFiltros; i++) {
@@ -204,7 +194,8 @@ void status() {
     }
 }
 
-void transform (char ** args) {
+void transform (int nArgs, char ** args) {
+    //incrementInstances(nArgs, args);
 
     if (fork() == 0) {
         wr_fifoSC = open(fifoSC, O_WRONLY);
@@ -214,12 +205,42 @@ void transform (char ** args) {
         write(wr_fifoSC, pending, sizeof(pending));
         char processing[] = "processing\n";
         write(wr_fifoSC, processing, sizeof(processing));
+
         if(fork() == 0) {
             execv("transform", args);
         }
+
         wait(NULL);
         close(wr_fifoSC);
         _exit(0);
+    }
+    //decrementInstances(nArgs, args);
+
+}
+
+void incrementInstances(int nArgs, char ** args) {
+
+    int nFiltros = nArgs - 5;
+    
+    for (int i = 0; i < nFiltros; i++) {
+        for (int k = 0; k < 5; k++) {
+            if(strcmp(args[i + 3], filtros[k].nome) == 0) {
+                filtros[k].current += 1;
+            }
+        }
+    }
+}
+
+void decrementInstances(int nArgs, char ** args) {
+
+    int nFiltros = nArgs - 5;
+    
+    for (int i = 0; i < nFiltros; i++) {
+        for (int k = 0; k < 5; k++) {
+            if(strcmp(args[i + 3], filtros[k].nome) == 0) {
+                filtros[k].current -= 1;
+            }
+        }
     }
 }
 

@@ -61,8 +61,6 @@ void apllyFilters(int nArgs, char ** args) {
 
     char * path = args[nArgs - 1];
 
-    //sleep(30);
-
     //create pipes
     int nPipes = nArgs - 6;
     int pipes[nPipes][2];
@@ -86,7 +84,8 @@ void apllyFilters(int nArgs, char ** args) {
                 close(output);
             }
             
-            else if (i == 0) { //first filter
+            //first filter
+            else if (i == 0) { 
                 //setup input
                 int input = open(args[1], O_RDWR); 
                 dup2(input, 0);
@@ -96,7 +95,8 @@ void apllyFilters(int nArgs, char ** args) {
                 dup2(pipes[i][1], 1);
             }
 
-            else if(i == nArgs - 6) { //last filter
+            //last filter
+            else if(i == nArgs - 6) {
                 //setup input
                 dup2(pipes[i - 1][0], 0);
 
@@ -106,6 +106,7 @@ void apllyFilters(int nArgs, char ** args) {
                 close(output);
 
             }
+            //middle filters
             else {
                 //setup input
                 dup2(pipes[i - 1][0], 0);
@@ -129,6 +130,5 @@ void apllyFilters(int nArgs, char ** args) {
                 }
             }
         }
-        //kill(getpid(), -9);
     }
 }

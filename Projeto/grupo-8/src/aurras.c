@@ -3,12 +3,15 @@
 #include <string.h> 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>  //O_WRONLY etc..
-#include <unistd.h> //open and close
+#include <fcntl.h>  
+#include <unistd.h> 
 
 //client
 int main(int argc, char * argv[]) {
 
+    /**
+     * Imprimir informações de uso do client
+    */
     if (argc == 1) {
         printf("./aurras status\n./aurras transform input-filename output-filename filter-id-1 filter-id-2 ...\n");
         return 0;
@@ -42,7 +45,6 @@ int main(int argc, char * argv[]) {
         strcat(res, argv[i]);
         strcat(res, "\n");
     }
-    //strcat(res, "\n");
 
     /**
      * Escrever a mensagem para o fifo
@@ -56,6 +58,7 @@ int main(int argc, char * argv[]) {
     free(res);
     close(wr_fifoCS);
 
+    //caso o comando seja status
     if(!strcmp(argv[1], "status")) {
         int rd_fifoStatus = open("../tmp/fifoStatus", O_RDONLY);
         if (rd_fifoStatus < 0) rd_fifoStatus = open("tmp/fifoStatus", O_RDONLY);
