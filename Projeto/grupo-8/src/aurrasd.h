@@ -9,10 +9,13 @@ int rd_fifoCS;
 int wr_fifoCS;
 int rd_fifoSC;
 int wr_fifoSC;
+int rd_fifoStatus;
+int wr_fifoStatus;
 char * filterPath;
 char * configPath;
 char * fifoCS;
 char * fifoSC;
+char * fifoStatus;
 
 struct config {
     char * nome;

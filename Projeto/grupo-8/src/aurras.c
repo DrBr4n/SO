@@ -56,20 +56,30 @@ int main(int argc, char * argv[]) {
     free(res);
     close(wr_fifoCS);
 
-    
-    int rd_fifoSC = open("../tmp/fifoSC", O_RDONLY);
-    if (rd_fifoSC < 0) rd_fifoSC = open("tmp/fifoSC", O_RDONLY);
-    if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
+    if(!strcmp(argv[1], "status")) {
+        int rd_fifoStatus = open("../tmp/fifoStatus", O_RDONLY);
+        if (rd_fifoStatus < 0) rd_fifoStatus = open("tmp/fifoStatus", O_RDONLY);
+        if (rd_fifoStatus < 0) perror("Erro ao abrir fifoStatus em modo leitura\n");
 
-    char buf[1024];
-    int bytes_read = 0;
+        char buf[1024];
+        int bytes_read = 0;
 
-    while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
-        write(1, buf, bytes_read);
+        while ((bytes_read = read(rd_fifoStatus, buf, 1024)) > 0) {
+            write(1, buf, bytes_read);
+        }
+    }
+    else {
+        int rd_fifoSC = open("../tmp/fifoSC", O_RDONLY);
+        if (rd_fifoSC < 0) rd_fifoSC = open("tmp/fifoSC", O_RDONLY);
+        if (rd_fifoSC < 0) perror("Erro ao abrir fifoSC em modo leitura\n");
+
+        char buf[1024];
+        int bytes_read = 0;
+
+        while ((bytes_read = read(rd_fifoSC, buf, 1024)) > 0) {
+            write(1, buf, bytes_read);
+        }
     }
 
-    //close(rd_fifoSC);
-    
-    
     return 0;
 }

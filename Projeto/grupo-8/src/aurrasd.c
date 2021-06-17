@@ -78,13 +78,16 @@ void setup(char * args) {
     if (args[0] == '.') {
         fifoCS = "../tmp/fifoCS";
         fifoSC = "../tmp/fifoSC";
+        fifoStatus = "../tmp/fifoStatus";
     }
     else {
         fifoCS = "tmp/fifoCS";
         fifoSC = "tmp/fifoSC";
+        fifoStatus = "tmp/fifoStatus";
     }
     if(mkfifo(fifoCS, 0666) < 0) perror("mkfifoCS\n");
     if(mkfifo(fifoSC, 0666) < 0) perror("mkfifoSC\n");
+    if(mkfifo(fifoStatus, 0666) < 0) perror("mkfifoSC\n");
 
     /**
      * Criar descritor de ficheiro para o extremo de leitura do fifo
@@ -117,6 +120,7 @@ void shutdown() {
     */
     unlink(fifoCS);
     unlink(fifoSC);
+    unlink(fifoStatus);
 }
 
 void parse_entry(char* buf) {
@@ -181,21 +185,21 @@ void parse_entry(char* buf) {
 
 void status() {
     if (fork() == 0) {
-        wr_fifoSC = open(fifoSC, O_WRONLY);
-        if ((wr_fifoSC < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
+        wr_fifoStatus = open(fifoStatus, O_WRONLY);
+        if ((wr_fifoStatus < 0)) perror("Erro ao abrir fifoCS em modo escrita\n");
 
         //printQueue();
         char buffer[1024];
         int nbytes = 0;
         for (int i = 0; i < nFiltros; i++) {
             nbytes = sprintf(buffer, "filter %s: %d/%d (running/max)\n", filtros[i].nome, filtros[i].current, filtros[i].max); 
-            write(wr_fifoSC, buffer, nbytes);
+            write(wr_fifoStatus, buffer, nbytes);
         }
         
         nbytes = sprintf(buffer, "pid: %d\n", getppid());
-        write(wr_fifoSC, buffer, nbytes);
+        write(wr_fifoStatus, buffer, nbytes);
 
-        close(wr_fifoSC);
+        close(wr_fifoStatus);
         _exit(0);
     }
 }
