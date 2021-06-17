@@ -1,5 +1,8 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "queue.h"
+
+printf("testing\n");
 
 void initQueueC (QueueC *qc) {
     *qc = malloc(sizeof(struct queueCircular));
