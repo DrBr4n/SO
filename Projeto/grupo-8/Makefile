@@ -25,7 +25,7 @@ obj/transform.o: src/transform.c
 	gcc -Wall -g -c src/transform.c -o obj/transform.o
 
 clean:
-	rm obj/* tmp/* bin/aurras bin/aurrasd
+	rm obj/* tmp/* bin/aurras bin/aurrasd bin/transform
 
 test:
 	bin/aurras transform ../samples/sample-1-so.m4a ../output/sample-1-so-alto.mp3 alto

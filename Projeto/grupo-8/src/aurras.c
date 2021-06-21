@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
      * Imprimir informações de uso do client
     */
     if (argc == 1) {
-        printf("./aurras status\n./aurras transform input-filename output-filename filter-id-1 filter-id-2 ...\n");
+        printf("./aurras status\n./aurras transform ../samples/sample-1-so.m4a ../output/output.mp3 alto rapido eco\n");
         return 0;
         
     }
